@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if category %}
+        <h1 class="text-primary">{{category.title}}</h1>
+        {% for item in cards%}
+            <div class="card border-primary bg-light mb-3" style="width: 69rem;">
+              <div class="card-body">
+                <h3 class="card-title fw-bold text-secondary">{{item.word}}</h3>
+                <h5 class="card-text">{{item.translation}}</h5>
+                <a href="/card_delete/{{category.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
+              </div>
+                <div class="card-footer bg-transparent border-primary">
+                    Переведено <a href="https://developers.lingvolive.com/">Lingvo</a>
+                </div>
+            </div>
+        {% endfor %}
+        <br><br><br>
+        <nav class="navbar bg-primary">
+            <form action="" method="post">
+                {{ form.hidden_tag() }}
+                <p class="text-warning">{{ message }}</p>
+                {{ form.word(class="form-control") }}
+                <br>
+                {{ form.submit(type="submit", class="btn btn-outline-light") }}
+                <br><br>
+                {% for error in form.word.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </form>
+        </nav>
+    {% endif %}
+{% endblock %}

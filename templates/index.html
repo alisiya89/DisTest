@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <h1 class="text-primary">Мои категории</h1>
+        <br>
+        {% for item in categories%}
+            <div class="card border-primary bg-light mb-3" style="width: 69rem;">
+              <div class="card-body">
+                <h3 class="card-title fw-bold text-secondary"><a href="/category/{{item.id}}">{{item.title}}</a></h3>
+                <a href="/category_delete/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
+              </div>
+            </div>
+        {% endfor %}
+        <br><br><br>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            <p class="text-danger">{{message}}</p>
+            <h4 class="text-primary">{{ form.title.label }}</h4>
+            <p>{{ form.title(class="form-control") }}</p>
+                {% for error in form.title.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        </form>
+    {% else %}
+        <h2 class="text-primary text-center">EnglishCards поможет создавать свои категории и сохранять в них карточки с нужными словами и их переводом</h2>
+        <br>
+        <h3 class="text-secondary text-center"><a href="/register">Зарегистрируйтесь</a> чтобы начать</h3>
+        <br>
+        <h3 class="text-secondary text-center"><a href="/login">Авторизуйтесь</a> чтобы продолжить</h3>
+    {% endif %}
+{% endblock %}
