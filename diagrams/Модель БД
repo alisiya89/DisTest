@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-05-11T03:00:43.427Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="BvTEDpMYe1vpnd2Yr88r" version="21.0.6" type="github">
+<mxfile host="app.diagrams.net" modified="2023-05-11T03:35:55.610Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36" etag="f79PxKPbmFhHngU2MVIW" version="21.0.6" type="github">
   <diagram id="R2lEEEUBdFMjLlhIrx00" name="Page-1">
     <mxGraphModel dx="1434" dy="764" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
       <root>
@@ -214,7 +214,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="OxIpSnW5QUDVvXezuHYO-4" value="Тип вопроса" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" parent="1" vertex="1">
-          <mxGeometry x="760" y="290" width="250" height="90" as="geometry">
+          <mxGeometry x="760" y="280" width="250" height="90" as="geometry">
             <mxRectangle x="121" y="120" width="90" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
