@@ -6,130 +6,117 @@ from flask_login import login_user, logout_user, login_required
 from flask_login import LoginManager
 
 from data import db_session
-from forms.user import RegisterForm, LoginForm, FileForm
-from forms.category import CategoryForm
-from forms.card import CardForm
+from forms.user import RegisterForm, LoginForm
+from forms.poll import PollForm
+from forms.question import QuestionForm
 from data.users import User
-from data.categories import Category
-from data.cards import Card
-from api import API
+from data.polls import Poll
+from data.questions import Question
 
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
-app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SECRET_KEY'] = 'diss_teamwork'
 
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
-# Главная страница / страница со списком категорий пользователя
+# Главная страница / страница со списком тестов
 @app.route("/", methods=['GET', 'POST'])
 def index():
     db_sess = db_session.create_session()
-    categories = []
+    polls = []
     form = None
     if flask_login.current_user.is_authenticated:
         current_user = flask_login.current_user
         user = db_sess.query(User).filter(User.name == current_user.name).first()
-        categories = db_sess.query(Category).filter(Category.user_id == user.id)
-        form = CategoryForm()
+        polls = db_sess.query(Poll).filter(Poll.user_id == user.id)
+        form = PollForm()
         if form.validate_on_submit():
-            category_title = form.title.data
-            for item in current_user.categories:
-                if category_title.lower() == item.title.lower():
-                    message = "У вас уже есть такая категория"
+            poll_title = form.title.data
+            for item in current_user.polls:
+                if poll_title.lower() == item.name.lower():
+                    message = "У вас уже есть опрос с таким названием"
                     return render_template("index.html",
-                                           title='EnglishCards',
-                                           categories=sorted(categories),
+                                           title='DissTest',
+                                           polls=sorted(polls),
                                            form=form,
                                            message=message)
             db_sess = db_session.create_session()
-            category = Category()
-            category.title = category_title
-            category.user_id = user.id
-            current_user.categories.append(category)
+            poll = Poll()
+            poll.title = poll_title
+            poll.user_id = user.id
+            current_user.polls.append(poll)
             db_sess.merge(current_user)
             db_sess.commit()
             return redirect('/')
     return render_template("index.html",
-                           title='EnglishCards',
-                           categories=sorted(categories),
+                           title='DissTest',
+                           polls=sorted(polls),
                            form=form)
 
 
-# Страница с карточками выбранной категории
-@app.route("/category/<int:id>", methods=['GET', 'POST'])
+# Страница с вопросами выбранного опроса
+@app.route("/poll/<int:id>", methods=['GET', 'POST'])
 @login_required
-def category(id):
+def question_page(id):
     db_sess = db_session.create_session()
-    category = db_sess.query(Category).filter(Category.id == id).first()
-    cards = sorted(category.cards)
+    poll = db_sess.query(Poll).filter(Poll.id == id).first()
+    questions = sorted(poll.questions)
     form = None
     if id:
-        form = CardForm()
+        form = QuestionForm()
         if form.validate_on_submit():
-            card_word = form.word.data
-            for item in category.cards:
-                if card_word.lower() == item.word.lower():
-                    message = "В данной категории уже есть такое слово"
-                    return render_template("category.html",
-                                           title=category.title,
-                                           category = category,
-                                           cards=cards, form=form,
+            question_text = form.text.data
+            for item in poll.questions:
+                if question_text.lower() == item.text.lower():
+                    message = "В данном опросе уже есть такой вопрос"
+                    return render_template("poll.html",
+                                           title=poll.title,
+                                           poll=poll,
+                                           questions=questions,
+                                           form=form,
                                            message=message)
             db_sess = db_session.create_session()
-            card = Card()
-            card.word = form.word.data
-            api = API()
-            translation = api.get_translation(card.word)
-            if translation != 404:
-                card.translation = api.get_translation(card.word)
-                category.cards.append(card)
-                db_sess.merge(category)
-                db_sess.commit()
-            else:
-                return render_template('/category.html',
-                                       title=category.title,
-                                       category = category,
-                                       cards=cards,
-                                       form=form,
-                                       message="Перевод не найден")
-            return redirect(f'/category/{id}')
-    return render_template("category.html",
-                           title=category.title,
-                           category = category,
-                           cards=cards,
+            question = Question()
+            question.text = form.text.data
+            poll.questions.append(question)
+            db_sess.merge(poll)
+            db_sess.commit()
+            return redirect(f'/poll/{id}')
+    return render_template("poll.html",
+                           title=poll.title,
+                           poll=poll,
+                           questions=questions,
                            form=form)
 
 
-# Удаление карточки
-@app.route('/card_delete/<int:cat_id>/<int:id>', methods=['GET', 'POST'])
+# Удаление вопроса
+@app.route('/question_delete/<int:poll_id>/<int:id>', methods=['GET', 'POST'])
 @login_required
-def card_delete(cat_id, id):
+def question_delete(poll_id, id):
     db_sess = db_session.create_session()
-    card = db_sess.query(Card).filter(Card.id == id).first()
-    category = db_sess.query(Category).filter(Category.id == cat_id).first()
-    category.cards.remove(card)
-    db_sess.merge(category)
+    question = db_sess.query(Question).filter(Question.id == id).first()
+    poll = db_sess.query(Poll).filter(Poll.id == poll_id).first()
+    poll.questions.remove(question)
+    db_sess.merge(poll)
     db_sess.commit()
-    categories = card.categories
-    if len(categories) == 0:
-        db_sess.delete(card)
-        db_sess.commit()
-    return redirect(f'/category/{cat_id}')
+    db_sess.delete(question)
+    db_sess.commit()
+    return redirect(f'/poll/{poll_id}')
 
 
-# Удаление категории
-@app.route('/category_delete/<int:id>', methods=['GET', 'POST'])
+# Удаление опроса
+@app.route('/poll_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-def category_delete(id):
+def poll_delete(id):
     db_sess = db_session.create_session()
-    category = db_sess.query(Category).filter(Category.id == id).first()
-    if category:
-        db_sess.delete(category)
+    poll = db_sess.query(Poll).filter(Poll.id == id).first()
+    if poll:
+        db_sess.delete(poll)
         db_sess.commit()
     else:
         abort(404)
@@ -142,25 +129,6 @@ def category_delete(id):
 def logout():
     logout_user()
     return redirect("/")
-
-
-# Загрузка картинки для аватара
-@app.route('/load_image', methods=['GET', 'POST'])
-@login_required
-def load_image():
-    form = FileForm()
-    if form.validate_on_submit():
-        user = flask_login.current_user
-        file = form.file.data
-        filename = f'images/{user.id}{file.filename[file.filename.find("."):]}'
-        with open(f'static/{filename}', "wb") as f:
-            f.write(file.read())
-        user.set_avatar(filename)
-        db_sess = db_session.create_session()
-        db_sess.merge(user)
-        db_sess.commit()
-        return redirect("/")
-    return render_template('load_image.html', title='Загрузка файла', form=form)
 
 
 # Регистрация пользователя
@@ -178,10 +146,9 @@ def reqister():
                                    form=form,
                                    message="Такой пользователь уже есть")
         user = User(
-            name=form.name.data,
+            name=form.name.data
         )
         user.set_password(form.password.data)
-        user.set_avatar('images/avatar.png')
         db_sess.add(user)
         db_sess.commit()
         return redirect('/login')
@@ -196,7 +163,7 @@ def login():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.name == form.name.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
+            login_user(user)
             return redirect("/")
         return render_template('login.html',
                                title='Авторизация',
@@ -206,6 +173,6 @@ def login():
 
 
 if __name__ == '__main__':
-    db_session.global_init("db/cards.db")
+    db_session.global_init("db/poll.db")
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

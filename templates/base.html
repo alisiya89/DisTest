@@ -12,12 +12,9 @@
 <body>
 <header>
     <nav class="navbar text-light bg-primary">
-        <a class="navbar-brand text-light" href="/"><h2>EnglishCards</h2></a>
+        <a class="navbar-brand text-light" href="/"><h2>DissTest</h2></a>
         {% if current_user.is_authenticated %}
         <p class="navbar-brand">
-            <a href="/load_image">
-                <img src="{{ url_for('static', filename=current_user.avatar) }}" height="45"/>
-            </a>
             {{current_user.name}}
             <a href="/logout">
                 <img src="{{ url_for('static', filename='images/out.png') }}" height="45"/>

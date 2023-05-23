@@ -4,7 +4,7 @@ from .db_session import SqlAlchemyBase
 
 
 # Вопросы результата
-class Question(SqlAlchemyBase):
+class ResultQuestion(SqlAlchemyBase):
     __tablename__ = 'result_questions'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

@@ -2,13 +2,13 @@
 
 {% block content %}
     {% if current_user.is_authenticated %}
-        <h1 class="text-primary">Мои категории</h1>
+        <h1 class="text-primary">Мои опросы</h1>
         <br>
-        {% for item in categories%}
+        {% for item in polls%}
             <div class="card border-primary bg-light mb-3" style="width: 69rem;">
               <div class="card-body">
-                <h3 class="card-title fw-bold text-secondary"><a href="/category/{{item.id}}">{{item.title}}</a></h3>
-                <a href="/category_delete/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
+                <h3 class="card-title fw-bold text-secondary"><a href="/poll/{{item.id}}">{{item.title}}</a></h3>
+                <a href="/poll_delete/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
               </div>
             </div>
         {% endfor %}
@@ -26,7 +26,7 @@
             <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
         </form>
     {% else %}
-        <h2 class="text-primary text-center">EnglishCards поможет создавать свои категории и сохранять в них карточки с нужными словами и их переводом</h2>
+        <h2 class="text-primary text-center">DissTest поможет создавать и проводить свои опросы</h2>
         <br>
         <h3 class="text-secondary text-center"><a href="/register">Зарегистрируйтесь</a> чтобы начать</h3>
         <br>

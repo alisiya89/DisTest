@@ -3,8 +3,8 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 
-# Форма добавления карточки
-class CardForm(FlaskForm):
-    word = StringField('Слово', validators=[DataRequired()])
+# Форма добавления вопроса
+class QuestionForm(FlaskForm):
+    text = StringField('Слово', validators=[DataRequired()])
     submit = SubmitField('Добавить слово')
 

@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-    {% if category %}
-        <h1 class="text-primary">{{category.title}}</h1>
-        {% for item in cards%}
+    {% if poll %}
+        <h1 class="text-primary">{{poll.title}}</h1>
+        {% for item in questions%}
             <div class="card border-primary bg-light mb-3" style="width: 69rem;">
               <div class="card-body">
-                <h3 class="card-title fw-bold text-secondary">{{item.word}}</h3>
-                <h5 class="card-text">{{item.translation}}</h5>
-                <a href="/card_delete/{{category.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
+                <h3 class="card-title fw-bold text-secondary">{{item.text}}</h3>
+                <h5 class="card-text">тест</h5>
+                <a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
               </div>
-                <div class="card-footer bg-transparent border-primary">
-                    Переведено <a href="https://developers.lingvolive.com/">Lingvo</a>
-                </div>
             </div>
         {% endfor %}
         <br><br><br>

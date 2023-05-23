@@ -13,9 +13,8 @@ class User(SqlAlchemyBase, UserMixin):
                            primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    avatar = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
-    categories = orm.relation("Category", back_populates='user')
+    polls = orm.relation("Poll", back_populates='user')
 
 
     def set_password(self, password):
@@ -24,7 +23,3 @@ class User(SqlAlchemyBase, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
-
-
-    def set_avatar(self, path):
-        self.avatar = path
