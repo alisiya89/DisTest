@@ -1,17 +1,17 @@
 import os
 
 import flask_login
-from flask import Flask, render_template, redirect, abort
+from flask import Flask, render_template, redirect, abort, request
 from flask_login import login_user, logout_user, login_required
 from flask_login import LoginManager
 
 from data import db_session
 from forms.user import RegisterForm, LoginForm
-from forms.poll import PollForm
-from forms.question import QuestionForm
+from forms.poll import PollForm, QuestionForm, AnswerForm
 from data.users import User
 from data.polls import Poll
 from data.questions import Question
+from data.answers import Answer
 
 
 app = Flask(__name__)
@@ -65,11 +65,13 @@ def index():
 def question_page(id):
     db_sess = db_session.create_session()
     poll = db_sess.query(Poll).filter(Poll.id == id).first()
-    questions = sorted(poll.questions)
+    questions = poll.questions
     form = None
     if id:
+
         form = QuestionForm()
-        if form.validate_on_submit():
+        answer_form = AnswerForm()
+        if form.validate_on_submit() and form.id.data == 'question':
             question_text = form.text.data
             for item in poll.questions:
                 if question_text.lower() == item.text.lower():
@@ -78,20 +80,43 @@ def question_page(id):
                                            title=poll.title,
                                            poll=poll,
                                            questions=questions,
-                                           form=form,
+                                           form=[form,answer_form],
                                            message=message)
             db_sess = db_session.create_session()
             question = Question()
-            question.text = form.text.data
+            question.text = question_text
             poll.questions.append(question)
             db_sess.merge(poll)
+            db_sess.commit()
+            return redirect(f'/poll/{id}')
+        elif answer_form.validate_on_submit() and answer_form.id.data == 'answer':
+            answer_text = answer_form.text.data
+            print(answer_form.question.data)
+            question = db_sess.query(Question).filter(Question.id == answer_form.question.data).first()
+
+            answers = db_sess.query(Answer).filter(Question.id == answer_form.question.data)
+            for item in answers:
+                if answer_text.lower() == item.text.lower():
+                    message = "В данном вопросе уже есть такой ответ"
+                    return render_template("poll.html",
+                                           title=poll.title,
+                                           poll=poll,
+                                           questions=questions,
+                                           form=[form,answer_form],
+                                           message=message)
+            db_sess = db_session.create_session()
+            answer = Answer()
+            answer.text = answer_text
+            answer.right = answer_form.right.data
+            question.answers.append(answer)
+            db_sess.merge(question)
             db_sess.commit()
             return redirect(f'/poll/{id}')
     return render_template("poll.html",
                            title=poll.title,
                            poll=poll,
                            questions=questions,
-                           form=form)
+                           form=[form,answer_form])
 
 
 # Удаление вопроса

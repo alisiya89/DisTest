@@ -6,26 +6,46 @@
             <div class="card border-primary bg-light mb-3" style="width: 69rem;">
               <div class="card-body">
                 <h3 class="card-title fw-bold text-secondary">{{item.text}}</h3>
-                <h5 class="card-text">тест</h5>
-                <a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
-              </div>
-            </div>
-        {% endfor %}
-        <br><br><br>
-        <nav class="navbar bg-primary">
-            <form action="" method="post">
-                {{ form.hidden_tag() }}
+               <h5 class="card-text">Ответы</h5>
+
+               <form name = answer action="" method="post">
+                {{ form[1].hidden_tag() }}
+                   {{ form[1].id(hidden=True, value='answer') }}
+                   {{ form[1].question(hidden=True, value=item.id) }}
                 <p class="text-warning">{{ message }}</p>
-                {{ form.word(class="form-control") }}
-                <br>
-                {{ form.submit(type="submit", class="btn btn-outline-light") }}
-                <br><br>
-                {% for error in form.word.errors %}
+                {{ form[1].text(class="form-control") }}
+                {% for error in form[1].text.errors %}
                     <p class="alert alert-danger" role="alert">
                         {{ error }}
                     </p>
                 {% endfor %}
+                    <table>
+                        <tr>
+                            <td> {{ form[1].right(class="form-control") }} </td>
+                            <td>{{ form[1].right.label }}</td>
+                        </tr>
+                    </table>
+                {{ form[1].submit(type="submit", class="btn btn-primary") }}
+               </form>
+
+                 <p> </p><a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить вопрос</a></p>
+              </div>
+            </div>
+        {% endfor %}
+<!--<nav class="navbar bg-primary">-->
+            <form action="" method="post">
+                 {{ form[0].id(hidden=True, value='question') }}
+                {{ form[0].hidden_tag() }}
+                <p class="text-warning">{{ message }}</p>
+                 <h4 class="text-primary">{{ form[0].text.label }}</h4>
+                <p> {{ form[0].text(class="form-control") }} </p>
+                {% for error in form[0].text.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+                <p> {{ form[0].submit(type="submit", class="btn btn-primary") }} </p>
             </form>
-        </nav>
+<!--       </nav>-->
     {% endif %}
 {% endblock %}
