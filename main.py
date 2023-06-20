@@ -12,6 +12,7 @@ from data.users import User
 from data.polls import Poll
 from data.questions import Question
 from data.answers import Answer
+from data.types import Type
 
 
 app = Flask(__name__)
@@ -68,8 +69,8 @@ def question_page(id):
     questions = poll.questions
     form = None
     if id:
-
-        form = QuestionForm()
+        types = db_sess.query(Type).all()
+        form = QuestionForm(types)
         answer_form = AnswerForm()
         if form.validate_on_submit() and form.id.data == 'question':
             question_text = form.text.data
@@ -85,6 +86,7 @@ def question_page(id):
             db_sess = db_session.create_session()
             question = Question()
             question.text = question_text
+            question.type
             poll.questions.append(question)
             db_sess.merge(poll)
             db_sess.commit()
@@ -196,8 +198,18 @@ def login():
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
 
+def add_types():
+    db_sess = db_session.create_session()
+    question_types = ['С одним ответом', 'С несколькими ответами']
+    for item in question_types:
+        type = Type(name=item)
+        db_sess.add(type)
+    db_sess.commit()
 
 if __name__ == '__main__':
     db_session.global_init("db/poll.db")
+    db_sess = db_session.create_session()
+    if not db_sess.query(Type).first():
+        add_types()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

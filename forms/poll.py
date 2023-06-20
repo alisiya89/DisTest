@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField
 from wtforms.validators import DataRequired
 
 
@@ -11,9 +11,15 @@ class PollForm(FlaskForm):
 
 # Форма добавления вопроса
 class QuestionForm(FlaskForm):
+
     id = StringField()
     text = TextAreaField('Вопрос', validators=[DataRequired()])
+    type = RadioField('Типы вопросов', choices=['1', '2'])
     submit = SubmitField('Добавить вопрос')
+
+    # def __init__(self, types):
+    #     self.types = types
+
 
 
 # Форма добавления ответа
