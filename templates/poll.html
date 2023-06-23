@@ -5,8 +5,33 @@
         {% for item in questions%}
             <div class="card border-primary bg-light mb-3" style="width: 69rem;">
               <div class="card-body">
-                <h3 class="card-title fw-bold text-secondary">{{item.text}}</h3>
-               <h5 class="card-text">Ответы</h5>
+                <h5 class="card-title fw-bold text-secondary">{{item.text}}</h5>
+                  <table class="table">
+                  {% for answer in item.answers %}
+                      <tr>
+                          <td class="col-md-8">
+                        {% if answer.right %}
+                            &#10004;
+                        {% else %}
+                            &emsp;
+                        {% endif %}
+                        {{ answer.text }}
+                          </td>
+                          <td class="col-md-2">
+                               <a href="/answer_change/{{poll.id}}/{{answer.id}}" class="btn btn-outline-secondary btn-sm">
+                                    {% if answer.right %}
+                                        сделать неверным
+                                   {% else %}
+                                         сделать верным
+                                    {% endif %}
+                               </a>
+                          </td>
+                          <td class="col-md-2">
+                               <a href="/answer_delete/{{poll.id}}/{{item.id}}/{{answer.id}}" class="btn btn-outline-secondary btn-sm">удалить ответ</a>
+                          </td>
+                      </tr>
+                  {% endfor %}
+                  </table>
                <form name = answer action="" method="post">
                 {{ form[1].hidden_tag() }}
                    {{ form[1].id(hidden=True, value='answer') }}
@@ -26,8 +51,8 @@
                     </table>
                 {{ form[1].submit(type="submit", class="btn btn-primary") }}
                </form>
-
-                 <p> </p><a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить вопрос</a></p>
+                <br>
+                 <p> <a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить вопрос</a></p>
               </div>
             </div>
         {% endfor %}

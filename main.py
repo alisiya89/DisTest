@@ -68,7 +68,6 @@ def question_page(id):
     poll = db_sess.query(Poll).filter(Poll.id == id).first()
     questions = poll.questions
     form = None
-    db_sess.close()
     if id:
         types = [type.name for type in db_sess.query(Type).all()]
         form = QuestionForm()
@@ -122,6 +121,29 @@ def question_page(id):
                            questions=questions,
                            form=[form,answer_form])
 
+# Изменение ответа
+@app.route('/answer_change/<int:poll_id>/<int:id>', methods=['GET', 'POST'])
+@login_required
+def answer_change(poll_id, id):
+    db_sess = db_session.create_session()
+    answer = db_sess.query(Answer).filter(Answer.id == id).first()
+    answer.right = not answer.right
+    db_sess.commit()
+    return redirect(f'/poll/{poll_id}')
+
+# Удаление ответа
+@app.route('/answer_delete/<int:poll_id>/<int:question_id>/<int:id>', methods=['GET', 'POST'])
+@login_required
+def answer_delete(poll_id, question_id, id):
+    db_sess = db_session.create_session()
+    answer = db_sess.query(Answer).filter(Answer.id == id).first()
+    question = db_sess.query(Question).filter(Question.id == question_id).first()
+    question.answers.remove(answer)
+    db_sess.merge(question)
+    db_sess.commit()
+    db_sess.delete(answer)
+    db_sess.commit()
+    return redirect(f'/poll/{poll_id}')
 
 # Удаление вопроса
 @app.route('/question_delete/<int:poll_id>/<int:id>', methods=['GET', 'POST'])
