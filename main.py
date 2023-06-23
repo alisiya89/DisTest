@@ -19,6 +19,7 @@ app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'diss_teamwork'
+quest_type = 'С одним ответом'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -83,11 +84,12 @@ def question_page(id):
                                            poll=poll,
                                            questions=questions,
                                            form=[form,answer_form],
-                                           message=message)
+                                           message=['q', item.id, message])
             db_sess = db_session.create_session()
             question = Question()
             question.text = question_text
             question.type = db_sess.query(Type).filter(Type.name == form.type.data).first()
+            # TODO не работает добавление вопроса
             poll.questions.append(question)
             db_sess.merge(poll)
             db_sess.commit()
@@ -106,7 +108,15 @@ def question_page(id):
                                            poll=poll,
                                            questions=questions,
                                            form=[form,answer_form],
-                                           message=message)
+                                           message=['a', question.id, message])
+            if question.type.name == quest_type and any([ans.right for ans in question.answers]) and answer_form.right.data:
+                message = "В данном вопросе не может быть несколько верных ответов"
+                return render_template("poll.html",
+                                       title=poll.title,
+                                       poll=poll,
+                                       questions=questions,
+                                       form=[form, answer_form],
+                                       message=['a', question.id, message])
             db_sess = db_session.create_session()
             answer = Answer()
             answer.text = answer_text
@@ -119,14 +129,21 @@ def question_page(id):
                            title=poll.title,
                            poll=poll,
                            questions=questions,
-                           form=[form,answer_form])
+                           form=[form,answer_form],
+                           message=['','',''])
+
 
 # Изменение ответа
-@app.route('/answer_change/<int:poll_id>/<int:id>', methods=['GET', 'POST'])
+@app.route('/answer_change/<int:poll_id>/<int:question_id>/<int:id>', methods=['GET', 'POST'])
 @login_required
-def answer_change(poll_id, id):
+def answer_change(poll_id, question_id, id):
     db_sess = db_session.create_session()
     answer = db_sess.query(Answer).filter(Answer.id == id).first()
+    question = db_sess.query(Question).filter(Question.id == question_id).first()
+    if question.type.name == quest_type:
+        right_answer = db_sess.query(Answer).filter(Question.id == id, Answer.right).first()
+        if right_answer:
+            right_answer.right = False
     answer.right = not answer.right
     db_sess.commit()
     return redirect(f'/poll/{poll_id}')

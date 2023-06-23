@@ -18,7 +18,7 @@
                         {{ answer.text }}
                           </td>
                           <td class="col-md-2">
-                               <a href="/answer_change/{{poll.id}}/{{answer.id}}" class="btn btn-outline-secondary btn-sm">
+                               <a href="/answer_change/{{poll.id}}/{{item.id}}/{{answer.id}}" class="btn btn-outline-secondary btn-sm">
                                     {% if answer.right %}
                                         сделать неверным
                                    {% else %}
@@ -36,7 +36,9 @@
                 {{ form[1].hidden_tag() }}
                    {{ form[1].id(hidden=True, value='answer') }}
                    {{ form[1].question(hidden=True, value=item.id) }}
-                <p class="text-warning">{{ message }}</p>
+<!--                   {% if message[0] == 'a' and message[1] == item.id %}-->
+                        <p class="text-warning">{{ message[2] }}</p>
+<!--                   {% endif %}-->
                 {{ form[1].text(class="form-control") }}
                  {% for error in form[1].text.errors %}
                     <p class="alert alert-danger" role="alert">
@@ -60,7 +62,9 @@
             <form action="" method="post">
                  {{ form[0].id(hidden=True, value='question') }}
                 {{ form[0].hidden_tag() }}
-                <p class="text-warning">{{ message }}</p>
+<!--                {% if message[0] == 'q' %}-->
+                    <p class="text-warning">{{ message[2] }}</p>
+<!--                {% endif %}-->
                  <h4 class="text-primary">{{ form[0].text.label }}</h4>
                 <p> {{ form[0].text(class="form-control") }} </p>
                  {% for error in form[0].text.errors %}
