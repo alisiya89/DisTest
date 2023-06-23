@@ -7,14 +7,13 @@
               <div class="card-body">
                 <h3 class="card-title fw-bold text-secondary">{{item.text}}</h3>
                <h5 class="card-text">Ответы</h5>
-
                <form name = answer action="" method="post">
                 {{ form[1].hidden_tag() }}
                    {{ form[1].id(hidden=True, value='answer') }}
                    {{ form[1].question(hidden=True, value=item.id) }}
                 <p class="text-warning">{{ message }}</p>
                 {{ form[1].text(class="form-control") }}
-                {% for error in form[1].text.errors %}
+                 {% for error in form[1].text.errors %}
                     <p class="alert alert-danger" role="alert">
                         {{ error }}
                     </p>
@@ -39,11 +38,12 @@
                 <p class="text-warning">{{ message }}</p>
                  <h4 class="text-primary">{{ form[0].text.label }}</h4>
                 <p> {{ form[0].text(class="form-control") }} </p>
-                {% for error in form[0].text.errors %}
+                 {% for error in form[0].text.errors %}
                     <p class="alert alert-danger" role="alert">
                         {{ error }}
                     </p>
                 {% endfor %}
+
                 {{ form[0].type }}
                 <p> {{ form[0].submit(type="submit", class="btn btn-primary") }} </p>
             </form>

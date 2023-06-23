@@ -14,11 +14,14 @@ class QuestionForm(FlaskForm):
 
     id = StringField()
     text = TextAreaField('Вопрос', validators=[DataRequired()])
-    type = RadioField('Типы вопросов', choices=['1', '2'])
+    type = RadioField('Типы вопросов')
     submit = SubmitField('Добавить вопрос')
-
+    #
     # def __init__(self, types):
-    #     self.types = types
+    #     super(QuestionForm, self).__init__(types)
+    #     self.type.choices = types
+
+
 
 
 

@@ -68,9 +68,11 @@ def question_page(id):
     poll = db_sess.query(Poll).filter(Poll.id == id).first()
     questions = poll.questions
     form = None
+    db_sess.close()
     if id:
-        types = db_sess.query(Type).all()
-        form = QuestionForm(types)
+        types = [type.name for type in db_sess.query(Type).all()]
+        form = QuestionForm()
+        form.type.choices = types
         answer_form = AnswerForm()
         if form.validate_on_submit() and form.id.data == 'question':
             question_text = form.text.data
@@ -86,7 +88,7 @@ def question_page(id):
             db_sess = db_session.create_session()
             question = Question()
             question.text = question_text
-            question.type
+            question.type = db_sess.query(Type).filter(Type.name == form.type.data).first()
             poll.questions.append(question)
             db_sess.merge(poll)
             db_sess.commit()
