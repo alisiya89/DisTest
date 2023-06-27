@@ -11,7 +11,11 @@
                       <tr>
                           <td class="col-md-8">
                         {% if answer.right %}
-                            &#10004;
+                              {% if item.type.name == 'С одним ответом' %}
+                                &#10004;
+                              {% else %}
+                                &#10003;
+                              {% endif %}
                         {% else %}
                             &emsp;
                         {% endif %}
@@ -36,9 +40,9 @@
                 {{ form[1].hidden_tag() }}
                    {{ form[1].id(hidden=True, value='answer') }}
                    {{ form[1].question(hidden=True, value=item.id) }}
-<!--                   {% if message[0] == 'a' and message[1] == item.id %}-->
+                   {% if message[0] == 'a' and message[1] == item.id %}
                         <p class="text-warning">{{ message[2] }}</p>
-<!--                   {% endif %}-->
+                   {% endif %}
                 {{ form[1].text(class="form-control") }}
                  {% for error in form[1].text.errors %}
                     <p class="alert alert-danger" role="alert">
@@ -62,9 +66,9 @@
             <form action="" method="post">
                  {{ form[0].id(hidden=True, value='question') }}
                 {{ form[0].hidden_tag() }}
-<!--                {% if message[0] == 'q' %}-->
+                {% if message[0] == 'q' %}
                     <p class="text-warning">{{ message[2] }}</p>
-<!--                {% endif %}-->
+                {% endif %}
                  <h4 class="text-primary">{{ form[0].text.label }}</h4>
                 <p> {{ form[0].text(class="form-control") }} </p>
                  {% for error in form[0].text.errors %}
