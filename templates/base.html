@@ -33,4 +33,11 @@
     {% block content %}{% endblock %}
 </main>
 </body>
+{% if request.path != '/' %}
+<footer>
+    <nav class="navbar text-light bg-primary">
+    <a class="navbar-brand text-light" href="/">На главную</a>
+    </nav>
+</footer>
+{% endif %}
 </html>

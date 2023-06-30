@@ -73,6 +73,8 @@ def question_page(id):
         types = [type.name for type in db_sess.query(Type).all()]
         form = QuestionForm()
         form.type.choices = types
+        # form.type.default = types[0]
+        # form.process()
         answer_form = AnswerForm()
         if form.validate_on_submit() and form.id.data == 'question':
             question_text = form.text.data
@@ -89,18 +91,18 @@ def question_page(id):
             question = Question()
             question.text = question_text
             question.type = db_sess.query(Type).filter(Type.name == form.type.data).first()
-            # TODO не работает добавление вопроса
             poll.questions.append(question)
             db_sess.merge(poll)
             db_sess.commit()
             return redirect(f'/poll/{id}')
         elif answer_form.validate_on_submit() and answer_form.id.data == 'answer':
             answer_text = answer_form.text.data
-            print(answer_form.question.data)
             question = db_sess.query(Question).filter(Question.id == answer_form.question.data).first()
 
-            answers = db_sess.query(Answer).filter(Question.id == answer_form.question.data)
+            answers = question.answers
+            print("вопрос", answer_form.question.data)
             for item in answers:
+                print(item.text)
                 if answer_text.lower() == item.text.lower():
                     message = "В данном вопросе уже есть такой ответ"
                     return render_template("poll.html",
