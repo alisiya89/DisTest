@@ -1,12 +1,17 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField
+from wtforms import StringField, SubmitField, BooleanField, TextAreaField, BooleanField, RadioField, Label
 from wtforms.validators import DataRequired
 
 
-# Форма добавления опроса
-class PollForm(FlaskForm):
-    title = StringField('Название опроса', validators=[DataRequired()])
-    submit = SubmitField('Добавить опрос')
+# Форма прохождения опроса
+class TestForm(FlaskForm):
+    id = StringField()
+    questions = []
+    submit = SubmitField('Отправить ответы')
+
+    def __init__(self, count):
+        FlaskForm.__init__(self)
+        self.questions = [[Label(field_id=i, text=''), RadioField()] for i in range(count)]
 
 
 # Форма добавления вопроса

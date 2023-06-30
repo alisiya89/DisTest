@@ -8,7 +8,18 @@
             <div class="card border-primary bg-light mb-3" style="width: 69rem;">
               <div class="card-body">
                 <h3 class="card-title fw-bold text-secondary"><a href="/poll/{{item.id}}">{{item.title}}</a></h3>
-                <a href="/poll_delete/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить</a>
+                  <p></p><a href="/poll_publish/{{item.id}}" class="btn btn-primary btn-sm">
+                                    {% if item.ref %}
+                                        снять с публиикации
+                                   {% else %}
+                                        опубликовать
+                                    {% endif %}
+                  </a>
+                   {% if item.ref %}
+                  &emsp;&emsp;<a href={{item.ref}} target="_blank">{{item.ref}}</a>
+                   {% endif %}
+                  </p>
+                  <p><a href="/poll_delete/{{ item.id }}" class="btn btn-outline-secondary btn-sm">удалить</a></p>
               </div>
             </div>
         {% endfor %}

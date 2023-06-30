@@ -36,33 +36,34 @@
                       </tr>
                   {% endfor %}
                   </table>
-               <form name = answer action="" method="post">
-                {{ form[1].hidden_tag() }}
-                   {{ form[1].id(hidden=True, value='answer') }}
-                   {{ form[1].question(hidden=True, value=item.id) }}
-                   {% if message[0] == 'a' and message[1] == item.id %}
-                        <p class="text-warning">{{ message[2] }}</p>
-                   {% endif %}
-                {{ form[1].text(class="form-control") }}
-                 {% for error in form[1].text.errors %}
-                    <p class="alert alert-danger" role="alert">
-                        {{ error }}
-                    </p>
-                {% endfor %}
-                    <table>
-                        <tr>
-                            <td> {{ form[1].right(class="form-control") }} </td>
-                            <td>{{ form[1].right.label }}</td>
-                        </tr>
-                    </table>
-                {{ form[1].submit(type="submit", class="btn btn-primary") }}
-               </form>
+                  {% if item.type.name != 'Без ответов' %}
+                       <form name = answer action="" method="post">
+                        {{ form[1].hidden_tag() }}
+                           {{ form[1].id(hidden=True, value='answer') }}
+                           {{ form[1].question(hidden=True, value=item.id) }}
+                           {% if message[0] == 'a' and message[1] == item.id %}
+                                <p class="text-warning">{{ message[2] }}</p>
+                           {% endif %}
+                        {{ form[1].text(class="form-control") }}
+                         {% for error in form[1].text.errors %}
+                            <p class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+                            <table>
+                                <tr>
+                                    <td> {{ form[1].right(class="form-control") }} </td>
+                                    <td>{{ form[1].right.label }}</td>
+                                </tr>
+                            </table>
+                        {{ form[1].submit(type="submit", class="btn btn-primary btn-sm") }}
+                       </form>
+                  {% endif %}
                 <br>
                  <p> <a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить вопрос</a></p>
               </div>
             </div>
         {% endfor %}
-<!--<nav class="navbar bg-primary">-->
             <form action="" method="post">
                  {{ form[0].id(hidden=True, value='question') }}
                 {{ form[0].hidden_tag() }}
@@ -80,6 +81,5 @@
                 {{ form[0].type }}
                 <p> {{ form[0].submit(type="submit", class="btn btn-primary") }} </p>
             </form>
-<!--       </nav>-->
     {% endif %}
 {% endblock %}

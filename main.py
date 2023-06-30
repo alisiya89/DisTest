@@ -8,6 +8,7 @@ from flask_login import LoginManager
 from data import db_session
 from forms.user import RegisterForm, LoginForm
 from forms.poll import PollForm, QuestionForm, AnswerForm
+from forms.test import TestForm
 from data.users import User
 from data.polls import Poll
 from data.questions import Question
@@ -40,14 +41,13 @@ def index():
         if form.validate_on_submit():
             poll_title = form.title.data
             for item in current_user.polls:
-                if poll_title.lower() == item.name.lower():
+                if poll_title.lower() == item.title.lower():
                     message = "У вас уже есть опрос с таким названием"
                     return render_template("index.html",
                                            title='DissTest',
                                            polls=sorted(polls),
                                            form=form,
                                            message=message)
-            db_sess = db_session.create_session()
             poll = Poll()
             poll.title = poll_title
             poll.user_id = user.id
@@ -58,6 +58,24 @@ def index():
     return render_template("index.html",
                            title='DissTest',
                            polls=sorted(polls),
+                           form=form)
+
+
+# Страница с опросом для прохождения
+@app.route("/test/<int:id>", methods=['GET', 'POST'])
+@login_required
+def test_page(id):
+    form = None
+    if id:
+        db_sess = db_session.create_session()
+        poll = db_sess.query(Poll).filter(Poll.id == id).first()
+        questions = poll.questions
+        form = TestForm(len(questions))
+        for i in range(len(questions)):
+            form.questions[i][0] = questions[i].text
+    return render_template("test.html",
+                           title=poll.title,
+                           poll=poll,
                            form=form)
 
 
@@ -87,7 +105,6 @@ def question_page(id):
                                            questions=questions,
                                            form=[form,answer_form],
                                            message=['q', item.id, message])
-            db_sess = db_session.create_session()
             question = Question()
             question.text = question_text
             question.type = db_sess.query(Type).filter(Type.name == form.type.data).first()
@@ -98,11 +115,8 @@ def question_page(id):
         elif answer_form.validate_on_submit() and answer_form.id.data == 'answer':
             answer_text = answer_form.text.data
             question = db_sess.query(Question).filter(Question.id == answer_form.question.data).first()
-
             answers = question.answers
-            print("вопрос", answer_form.question.data)
             for item in answers:
-                print(item.text)
                 if answer_text.lower() == item.text.lower():
                     message = "В данном вопросе уже есть такой ответ"
                     return render_template("poll.html",
@@ -119,7 +133,6 @@ def question_page(id):
                                        questions=questions,
                                        form=[form, answer_form],
                                        message=['a', question.id, message])
-            db_sess = db_session.create_session()
             answer = Answer()
             answer.text = answer_text
             answer.right = answer_form.right.data
@@ -143,9 +156,9 @@ def answer_change(poll_id, question_id, id):
     answer = db_sess.query(Answer).filter(Answer.id == id).first()
     question = db_sess.query(Question).filter(Question.id == question_id).first()
     if question.type.name == quest_type:
-        right_answer = db_sess.query(Answer).filter(Question.id == id, Answer.right).first()
+        right_answer = list(filter(lambda x: x.right, question.answers))
         if right_answer:
-            right_answer.right = False
+            right_answer[0].right = False
     answer.right = not answer.right
     db_sess.commit()
     return redirect(f'/poll/{poll_id}')
@@ -190,6 +203,20 @@ def poll_delete(id):
         db_sess.commit()
     else:
         abort(404)
+    return redirect('/')
+
+
+# Публикация/снятие с публикации опроса
+@app.route('/poll_publish/<int:poll_id>', methods=['GET', 'POST'])
+@login_required
+def poll_publish(poll_id):
+    db_sess = db_session.create_session()
+    poll = db_sess.query(Poll).filter(Poll.id == poll_id).first()
+    if poll.ref:
+        poll.ref = None
+    else:
+        poll.ref = f'{request.host_url}test/{poll_id}'
+    db_sess.commit()
     return redirect('/')
 
 
@@ -243,7 +270,7 @@ def login():
 
 def add_types():
     db_sess = db_session.create_session()
-    question_types = ['С одним ответом', 'С несколькими ответами']
+    question_types = ['С одним ответом', 'С несколькими ответами', 'Без ответов']
     for item in question_types:
         type = Type(name=item)
         db_sess.add(type)
