@@ -5,6 +5,18 @@
             <form action="" method="post">
                  {{ form.id(hidden=True, value='question') }}
                 {{ form.hidden_tag() }}
+                {% for item in form.questions%}
+                    <div class="card border-primary bg-light mb-3" style="width: 69rem;">
+                    <div class="card-body">
+                    <h5 class="card-title fw-bold text-secondary">{{ item.question}}</h5>
+                    {% if item.type == 'one' %}
+                        {{ item.one_answer }}
+                    {% else %}
+                        {{ item.many_answer }}
+                    {% endif %}
+                    </div>
+                    </div>
+                {% endfor %}
                 <p> {{ form.submit(type="submit", class="btn btn-primary") }} </p>
             </form>
     {% endif %}

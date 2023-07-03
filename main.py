@@ -8,7 +8,7 @@ from flask_login import LoginManager
 from data import db_session
 from forms.user import RegisterForm, LoginForm
 from forms.poll import PollForm, QuestionForm, AnswerForm
-from forms.test import TestForm
+from forms.test import TestForm, AskForm
 from data.users import User
 from data.polls import Poll
 from data.questions import Question
@@ -70,9 +70,19 @@ def test_page(id):
         db_sess = db_session.create_session()
         poll = db_sess.query(Poll).filter(Poll.id == id).first()
         questions = poll.questions
-        form = TestForm(len(questions))
+        form = TestForm()
+        question_list = []
         for i in range(len(questions)):
-            form.questions[i][0] = questions[i].text
+            ask_form = AskForm()
+            ask_form.question = questions[i].text
+            if questions[i].type.name == quest_type:
+                ask_form.type = 'one'
+                ask_form.one_answer.choices = [answer.text for answer in questions[i].answers]
+            else:
+                ask_form.type = 'many'
+                ask_form.many_answer.choices = [answer.text for answer in questions[i].answers]
+            question_list.append(ask_form)
+        form.questions = question_list
     return render_template("test.html",
                            title=poll.title,
                            poll=poll,
