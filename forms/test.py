@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FormField, FieldList, SelectField, BooleanField, RadioField, Label
+from wtforms import StringField, SubmitField, FormField, FieldList, SelectMultipleField, BooleanField, RadioField, Label
 from wtforms.validators import DataRequired
+from wtforms.widgets import ListWidget, CheckboxInput
 
 
 # Форма ответа на вопрос
@@ -10,7 +11,9 @@ class AskForm(FlaskForm):
     question = Label(field_id=0, text='')
     type = ''
     one_answer = RadioField()
-    many_answer = SelectField()
+    many_answer = SelectMultipleField(
+        widget=ListWidget(html_tag='ul', prefix_label=False),
+        option_widget=CheckboxInput())
 
 
 
