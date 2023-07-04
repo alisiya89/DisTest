@@ -15,6 +15,8 @@ class AskForm(FlaskForm):
         widget=ListWidget(html_tag='ul', prefix_label=False),
         option_widget=CheckboxInput())
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 # Форма прохождения опроса
@@ -23,10 +25,10 @@ class TestForm(FlaskForm):
     id = StringField()
     questions = FieldList(FormField(AskForm))
     submit = SubmitField('Отправить ответы')
-    #
-    # def __init__(self, count):
-    #     super(TestForm, self).__init__()
-    #     self.questions = [[Label(field_id=i, text=''), RadioField()] for i in range(count)]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.questions = [[Label(field_id=i, text=''), RadioField()] for i in range(count)]
 
 
 

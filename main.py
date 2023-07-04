@@ -77,9 +77,11 @@ def test_page(id):
             ask_form.question = questions[i].text
             if questions[i].type.name == quest_type:
                 ask_form.type = 'one'
+                ask_form.one_answer.name = str(i)
                 ask_form.one_answer.choices = [answer.text for answer in questions[i].answers]
             else:
                 ask_form.type = 'many'
+                ask_form.many_answer.name = str(i)
                 ask_form.many_answer.choices = [answer.text for answer in questions[i].answers]
             question_list.append(ask_form)
         form.questions = question_list
