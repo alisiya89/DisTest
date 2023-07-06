@@ -28,10 +28,10 @@ class AskForm(Form):
     question = Label(field_id=0, text='')
     vid = ''
     one_answer = RadioField(coerce=int)
-    # TODO валидация поля с множественным выбором
-    many_answer = SelectMultipleField(
-        widget=ListWidget(html_tag='ul', prefix_label=False),
-        option_widget=CheckboxInput(), )
+    # # TODO валидация поля с множественным выбором
+    # many_answer = SelectMultipleField(
+    #     widget=ListWidget(html_tag='ul', prefix_label=False),
+    #     option_widget=CheckboxInput(), )
 
 
 # Форма прохождения опроса

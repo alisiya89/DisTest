@@ -60,7 +60,9 @@
                        </form>
                   {% endif %}
                 <br>
-                 <p> <a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить вопрос</a></p>
+                 <p> <a href="/question_delete/{{poll.id}}/{{ item.id }}" class="btn btn-outline-secondary btn-sm">Удалить вопрос</a>
+                  <a href="/question_locate/{{poll.id}}/{{ item.id }}/up" class="btn btn-outline-secondary btn-sm">Выше</a>
+                  <a href="/question_locate/{{poll.id}}/{{ item.id }}/down" class="btn btn-outline-secondary btn-sm">Ниже</a></p>
               </div>
             </div>
         {% endfor %}

@@ -80,12 +80,12 @@ def test_page(id):
         for i in range(len(questions)):
             form.questions[i].id = questions[i].id
             form.questions[i].question = questions[i].text
-            if questions[i].type.name == question_types[0]:
-                form.questions[i].vid = 'one'
-                form.questions[i].one_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
-            elif questions[i].type.name == question_types[1]:
-                form.questions[i].vid = 'many'
-                form.questions[i].many_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
+            # if questions[i].type.name == question_types[0]:
+            form.questions[i].vid = 'one'
+            form.questions[i].one_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
+            # elif questions[i].type.name == question_types[1]:
+            #     form.questions[i].vid = 'many'
+            #     form.questions[i].many_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
         if form.is_submitted():
             for question in form.questions:
                 if question.vid == 'one':
@@ -135,8 +135,6 @@ def question_page(id):
         types = [type.name for type in db_sess.query(Type).all()]
         form = QuestionForm()
         form.type.choices = types
-        # form.type.default = types[0]
-        # form.process()
         answer_form = AnswerForm()
         if form.validate_on_submit() and form.id.data == 'question':
             question_text = form.text.data
@@ -146,12 +144,16 @@ def question_page(id):
                     return render_template("poll.html",
                                            title=poll.title,
                                            poll=poll,
-                                           questions=questions,
+                                           questions=sorted(questions),
                                            form=[form,answer_form],
                                            message=['q', item.id, message])
             question = Question()
             question.text = question_text
             question.type = db_sess.query(Type).filter(Type.name == form.type.data).first()
+            if poll.questions:
+                question.number = max(poll.questions, key=lambda x: x.number).number + 1
+            else:
+                question.number = 1
             poll.questions.append(question)
             db_sess.merge(poll)
             db_sess.commit()
@@ -166,7 +168,7 @@ def question_page(id):
                     return render_template("poll.html",
                                            title=poll.title,
                                            poll=poll,
-                                           questions=questions,
+                                           questions=sorted(questions),
                                            form=[form,answer_form],
                                            message=['a', question.id, message])
             if question.type.name == question_types[0] and any([ans.right for ans in question.answers]) and answer_form.right.data:
@@ -174,7 +176,7 @@ def question_page(id):
                 return render_template("poll.html",
                                        title=poll.title,
                                        poll=poll,
-                                       questions=questions,
+                                       questions=sorted(questions),
                                        form=[form, answer_form],
                                        message=['a', question.id, message])
             answer = Answer()
@@ -187,13 +189,13 @@ def question_page(id):
     return render_template("poll.html",
                            title=poll.title,
                            poll=poll,
-                           questions=questions,
+                           questions=sorted(questions),
                            form=[form,answer_form],
                            message=['','',''])
 
 
 # Изменение ответа
-@app.route('/answer_change/<int:poll_id>/<int:question_id>/<int:id>', methods=['GET', 'POST'])
+@app.route('/answer_change/<int:poll_id>/<int:question_id>/<int:id>', methods=['GET'])
 @login_required
 def answer_change(poll_id, question_id, id):
     db_sess = db_session.create_session()
@@ -208,7 +210,7 @@ def answer_change(poll_id, question_id, id):
     return redirect(f'/poll/{poll_id}')
 
 # Удаление ответа
-@app.route('/answer_delete/<int:poll_id>/<int:question_id>/<int:id>', methods=['GET', 'POST'])
+@app.route('/answer_delete/<int:poll_id>/<int:question_id>/<int:id>', methods=['GET'])
 @login_required
 def answer_delete(poll_id, question_id, id):
     db_sess = db_session.create_session()
@@ -222,22 +224,46 @@ def answer_delete(poll_id, question_id, id):
     return redirect(f'/poll/{poll_id}')
 
 # Удаление вопроса
-@app.route('/question_delete/<int:poll_id>/<int:id>', methods=['GET', 'POST'])
+@app.route('/question_delete/<int:poll_id>/<int:id>', methods=['GET'])
 @login_required
 def question_delete(poll_id, id):
     db_sess = db_session.create_session()
     question = db_sess.query(Question).filter(Question.id == id).first()
+    next_questions = db_sess.query(Question).filter(Question.number > question.number)
     poll = db_sess.query(Poll).filter(Poll.id == poll_id).first()
     poll.questions.remove(question)
     db_sess.merge(poll)
     db_sess.commit()
     db_sess.delete(question)
     db_sess.commit()
+    for quest in next_questions:
+        quest.number -= 1
+        db_sess.merge(quest)
+        db_sess.commit()
+    return redirect(f'/poll/{poll_id}')
+
+# Перемещение вопроса
+@app.route('/question_locate/<int:poll_id>/<int:id>/<string:direct>', methods=['GET'])
+@login_required
+def question_locate(poll_id, id, direct):
+    db_sess = db_session.create_session()
+    question = db_sess.query(Question).filter(Question.id == id).first()
+    d = 0
+    poll = db_sess.query(Poll).filter(Poll.id == poll_id).first()
+    if direct == 'up' and question.number > 1:
+        d = -1
+    elif direct == 'down' and question.number < len(poll.questions):
+        d = 1
+    if d:
+        near_question = db_sess.query(Question).filter(Question.number == question.number + d).first()
+        question.number, near_question.number = near_question.number, question.number
+        db_sess.merge(question, near_question)
+        db_sess.commit()
     return redirect(f'/poll/{poll_id}')
 
 
 # Удаление опроса
-@app.route('/poll_delete/<int:id>', methods=['GET', 'POST'])
+@app.route('/poll_delete/<int:id>', methods=['GET'])
 @login_required
 def poll_delete(id):
     db_sess = db_session.create_session()
@@ -251,7 +277,7 @@ def poll_delete(id):
 
 
 # Публикация/снятие с публикации опроса
-@app.route('/poll_publish/<int:poll_id>', methods=['GET', 'POST'])
+@app.route('/poll_publish/<int:poll_id>', methods=['GET'])
 @login_required
 def poll_publish(poll_id):
     db_sess = db_session.create_session()
