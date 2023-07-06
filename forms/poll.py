@@ -14,7 +14,7 @@ class QuestionForm(FlaskForm):
 
     id = StringField()
     text = TextAreaField('Вопрос', validators=[DataRequired()])
-    type = RadioField('Типы вопросов')
+    type = RadioField('Типы вопросов', validators=[DataRequired()])
     submit = SubmitField('Добавить вопрос')
 
 

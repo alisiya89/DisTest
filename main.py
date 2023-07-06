@@ -1,9 +1,11 @@
 import os
+import datetime
 
 import flask_login
 from flask import Flask, render_template, redirect, abort, request
 from flask_login import login_user, logout_user, login_required
 from flask_login import LoginManager
+from wtforms import FieldList, FormField
 
 from data import db_session
 from forms.user import RegisterForm, LoginForm
@@ -14,13 +16,16 @@ from data.polls import Poll
 from data.questions import Question
 from data.answers import Answer
 from data.types import Type
+from data.results import Result
+from data.result_questions import ResultQuestion
+from data.result_answers import ResultAnswer
 
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'diss_teamwork'
-quest_type = 'С одним ответом'
+question_types = ['С одним ответом', 'С несколькими ответами', 'Без ответов']
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -63,28 +68,55 @@ def index():
 
 # Страница с опросом для прохождения
 @app.route("/test/<int:id>", methods=['GET', 'POST'])
-@login_required
 def test_page(id):
-    form = None
     if id:
         db_sess = db_session.create_session()
         poll = db_sess.query(Poll).filter(Poll.id == id).first()
         questions = poll.questions
-        form = TestForm()
-        question_list = []
+        class LocalForm(TestForm): pass
+        LocalForm.questions = FieldList(FormField(AskForm), min_entries=len(questions))
+        form = LocalForm()
+        form.id.data = poll.id
         for i in range(len(questions)):
-            ask_form = AskForm()
-            ask_form.question = questions[i].text
-            if questions[i].type.name == quest_type:
-                ask_form.type = 'one'
-                ask_form.one_answer.name = str(i)
-                ask_form.one_answer.choices = [answer.text for answer in questions[i].answers]
-            else:
-                ask_form.type = 'many'
-                ask_form.many_answer.name = str(i)
-                ask_form.many_answer.choices = [answer.text for answer in questions[i].answers]
-            question_list.append(ask_form)
-        form.questions = question_list
+            form.questions[i].id = questions[i].id
+            form.questions[i].question = questions[i].text
+            if questions[i].type.name == question_types[0]:
+                form.questions[i].vid = 'one'
+                form.questions[i].one_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
+            elif questions[i].type.name == question_types[1]:
+                form.questions[i].vid = 'many'
+                form.questions[i].many_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
+        if form.is_submitted():
+            for question in form.questions:
+                if question.vid == 'one':
+                    print(question.one_answer.data)
+                elif question.vid == 'many':
+                    print(question.many_answer.data)
+            # result = Result()
+            # result.date = datetime.date.today()
+            # for question in form.questions:
+            #     result_question = ResultQuestion()
+            #     result.questions.append(result_question)
+            #     current_question = db_sess.query(Question).filter(Question.id == question.id).first()
+            #     result_question.question = current_question
+            #     result_answer = ResultAnswer()
+            #     result_question.answers.append(result_answer)
+            #     if question.type == 'one':
+            #         print("one", question.one_answer.data)
+            #         current_answer = question.one_answer.data
+            #         result_answer.answer = filter(lambda x: x.text == current_answer, current_question.answers)
+            #     else:
+            #         print("many", question.id)
+            #         current_answer = question.many_answer.data
+            #         print("many", question.many_answer.data)
+            #     print(current_answer)
+
+            # answer.text = answer_text
+            # answer.right = answer_form.right.data
+            # question.answers.append(answer)
+            # db_sess.merge(question)
+            # db_sess.commit()
+            return render_template('thank.html')
     return render_template("test.html",
                            title=poll.title,
                            poll=poll,
@@ -137,7 +169,7 @@ def question_page(id):
                                            questions=questions,
                                            form=[form,answer_form],
                                            message=['a', question.id, message])
-            if question.type.name == quest_type and any([ans.right for ans in question.answers]) and answer_form.right.data:
+            if question.type.name == question_types[0] and any([ans.right for ans in question.answers]) and answer_form.right.data:
                 message = "В данном вопросе не может быть несколько верных ответов"
                 return render_template("poll.html",
                                        title=poll.title,
@@ -167,7 +199,7 @@ def answer_change(poll_id, question_id, id):
     db_sess = db_session.create_session()
     answer = db_sess.query(Answer).filter(Answer.id == id).first()
     question = db_sess.query(Question).filter(Question.id == question_id).first()
-    if question.type.name == quest_type:
+    if question.type.name == question_types[0]:
         right_answer = list(filter(lambda x: x.right, question.answers))
         if right_answer:
             right_answer[0].right = False
@@ -282,7 +314,6 @@ def login():
 
 def add_types():
     db_sess = db_session.create_session()
-    question_types = ['С одним ответом', 'С несколькими ответами', 'Без ответов']
     for item in question_types:
         type = Type(name=item)
         db_sess.add(type)

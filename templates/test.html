@@ -2,25 +2,30 @@
 {% block content %}
     {% if poll %}
         <h1 class="text-primary">{{poll.title}}</h1>
-            <form action="" method="post">
-                 {{ form.id(hidden=True, value='question') }}
+            <form action="/test/{{poll.id}}" method="post">
+                 {{ form.id(hidden=True) }}
                 {{ form.hidden_tag() }}
                 {% for item in form.questions%}
                     <div class="card border-primary bg-light mb-3" style="width: 69rem;">
                     <div class="card-body">
-                    <h5 class="card-title fw-bold text-secondary">{{ item.question}}</h5>
+                        <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>
 <!--                        TODO убрать маркеры в списке-->
                         <ul class="list-unstyled">
-                    {% if item.type == 'one' %}
+                    {% if item.vid == 'one' %}
                         {{ item.one_answer }}
                     {% else %}
                         {{ item.many_answer }}
                     {% endif %}
                         </ul>
+                    {% for error in item.errors %}
+                        <p class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
                     </div>
                     </div>
                 {% endfor %}
-                <p> {{ form.submit(type="submit", class="btn btn-primary") }} </p>
+                <p> {{form.submit}} </p>
             </form>
     {% endif %}
 {% endblock %}
