@@ -10,7 +10,7 @@ from wtforms import FieldList, FormField
 from data import db_session
 from forms.user import RegisterForm, LoginForm
 from forms.poll import PollForm, QuestionForm, AnswerForm
-from forms.test import TestForm, AskForm
+from forms.test import TestForm, AskForm, ManyAskForm, OneAskForm
 from data.users import User
 from data.polls import Poll
 from data.questions import Question
@@ -73,25 +73,35 @@ def test_page(id):
         db_sess = db_session.create_session()
         poll = db_sess.query(Poll).filter(Poll.id == id).first()
         questions = poll.questions
+        no_answer_questions = list(filter(lambda x: x.type.name == question_types[2], questions))
+        one_answer_questions = list(filter(lambda x: x.type.name == question_types[0], questions))
+        many_answer_questions = list(filter(lambda x: x.type.name == question_types[1], questions))
         class LocalForm(TestForm): pass
-        LocalForm.questions = FieldList(FormField(AskForm), min_entries=len(questions))
+        LocalForm.no_questions = FieldList(FormField(AskForm), min_entries=len(no_answer_questions))
+        LocalForm.one_questions = FieldList(FormField(OneAskForm), min_entries=len(one_answer_questions))
+        LocalForm.many_questions = FieldList(FormField(ManyAskForm), min_entries=len(many_answer_questions))
         form = LocalForm()
         form.id.data = poll.id
-        for i in range(len(questions)):
-            form.questions[i].id = questions[i].id
-            form.questions[i].question = questions[i].text
-            # if questions[i].type.name == question_types[0]:
-            form.questions[i].vid = 'one'
-            form.questions[i].one_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
-            # elif questions[i].type.name == question_types[1]:
-            #     form.questions[i].vid = 'many'
-            #     form.questions[i].many_answer.choices = [(answer.id, answer.text) for answer in questions[i].answers]
+        for i in range(len(no_answer_questions)):
+            form.no_questions[i].id = no_answer_questions[i].id
+            form.no_questions[i].question = no_answer_questions[i].text
+        for i in range(len(one_answer_questions)):
+            form.one_questions[i].id = one_answer_questions[i].id
+            form.one_questions[i].question = one_answer_questions[i].text
+            form.one_questions[i].one_answer.choices = [(answer.id, answer.text) for answer in one_answer_questions[i].answers]
+        for i in range(len(many_answer_questions)):
+            form.many_questions[i].id = many_answer_questions[i].id
+            form.many_questions[i].question = many_answer_questions[i].text
+            form.many_questions[i].many_answer.choices = [(answer.id, answer.text) for answer in many_answer_questions[i].answers]
+        # TODO отсортировать список вопросов с использованием enumerate
+        questions = [form.no_questions[0], form.one_questions[1], form.many_questions[0], form.many_questions[1], form.one_questions[0]]
+        print(questions)
+
         if form.is_submitted():
-            for question in form.questions:
-                if question.vid == 'one':
-                    print(question.one_answer.data)
-                elif question.vid == 'many':
-                    print(question.many_answer.data)
+            for question in form.one_questions:
+                print(question.one_answer.data)
+            for question in form.many_questions:
+                print(question.many_answer.data)
             # result = Result()
             # result.date = datetime.date.today()
             # for question in form.questions:
@@ -120,7 +130,8 @@ def test_page(id):
     return render_template("test.html",
                            title=poll.title,
                            poll=poll,
-                           form=form)
+                           form=form,
+                           questions=questions)
 
 
 # Страница с вопросами выбранного опроса
