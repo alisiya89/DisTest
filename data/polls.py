@@ -17,6 +17,8 @@ class Poll(SqlAlchemyBase):
 
     questions = orm.relation("Question", back_populates='poll')
 
+    results = orm.relation("Result", back_populates='poll')
+
     def __lt__(self, other):
         return self.title < other.title
 

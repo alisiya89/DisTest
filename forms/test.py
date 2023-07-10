@@ -14,6 +14,7 @@ class RightManyAnswer:
 # Форма ответа на вопрос
 class AskForm(Form):
     id = StringField()
+    num = StringField()
     question = Label(field_id=0, text='')
 
 

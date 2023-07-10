@@ -9,8 +9,6 @@ class ResultAnswer(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    text = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    right = sqlalchemy.Column(sqlalchemy.Boolean, nullable=True)
     question_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("result_questions.id"))
     question = orm.relation('ResultQuestion')

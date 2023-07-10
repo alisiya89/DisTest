@@ -1,8 +1,9 @@
+import csv
 import os
 import datetime
 
 import flask_login
-from flask import Flask, render_template, redirect, abort, request
+from flask import Flask, render_template, redirect, abort, request, send_from_directory, current_app
 from flask_login import login_user, logout_user, login_required
 from flask_login import LoginManager
 from wtforms import FieldList, FormField
@@ -83,55 +84,83 @@ def test_page(id):
         form = LocalForm()
         form.id.data = poll.id
         for i in range(len(no_answer_questions)):
+            form.no_questions[i].num.data = no_answer_questions[i].number
             form.no_questions[i].id = no_answer_questions[i].id
             form.no_questions[i].question = no_answer_questions[i].text
         for i in range(len(one_answer_questions)):
+            form.one_questions[i].num.data = one_answer_questions[i].number
             form.one_questions[i].id = one_answer_questions[i].id
             form.one_questions[i].question = one_answer_questions[i].text
             form.one_questions[i].one_answer.choices = [(answer.id, answer.text) for answer in one_answer_questions[i].answers]
         for i in range(len(many_answer_questions)):
+            form.many_questions[i].num.data = many_answer_questions[i].number
             form.many_questions[i].id = many_answer_questions[i].id
             form.many_questions[i].question = many_answer_questions[i].text
             form.many_questions[i].many_answer.choices = [(answer.id, answer.text) for answer in many_answer_questions[i].answers]
-        # TODO отсортировать список вопросов с использованием enumerate
-        questions = [form.no_questions[0], form.one_questions[1], form.many_questions[0], form.many_questions[1], form.one_questions[0]]
-        print(questions)
-
+        questions = list(form.no_questions) + list(form.one_questions) + list(form.many_questions)
+        questions = sorted(questions, key=lambda x: int(x.num.data))
         if form.is_submitted():
+            mark = 0
+            result = Result()
+            result.date = datetime.date.today()
+            result.poll_id = form.id.data
             for question in form.one_questions:
-                print(question.one_answer.data)
+                result_question = ResultQuestion()
+                current_question = db_sess.query(Question).filter(Question.id == question.id).first()
+                result_question.question = current_question
+                result_answer = ResultAnswer()
+                result_answer.answer = list(filter(lambda x: x.id == question.one_answer.data, current_question.answers))[0]
+                if result_answer.answer.right:
+                    mark += 1
+                result_question.answers.append(result_answer)
+                result.questions.append(result_question)
             for question in form.many_questions:
-                print(question.many_answer.data)
-            # result = Result()
-            # result.date = datetime.date.today()
-            # for question in form.questions:
-            #     result_question = ResultQuestion()
-            #     result.questions.append(result_question)
-            #     current_question = db_sess.query(Question).filter(Question.id == question.id).first()
-            #     result_question.question = current_question
-            #     result_answer = ResultAnswer()
-            #     result_question.answers.append(result_answer)
-            #     if question.type == 'one':
-            #         print("one", question.one_answer.data)
-            #         current_answer = question.one_answer.data
-            #         result_answer.answer = filter(lambda x: x.text == current_answer, current_question.answers)
-            #     else:
-            #         print("many", question.id)
-            #         current_answer = question.many_answer.data
-            #         print("many", question.many_answer.data)
-            #     print(current_answer)
-
-            # answer.text = answer_text
-            # answer.right = answer_form.right.data
-            # question.answers.append(answer)
-            # db_sess.merge(question)
-            # db_sess.commit()
+                result_question = ResultQuestion()
+                current_question = db_sess.query(Question).filter(Question.id == question.id).first()
+                result_question.question = current_question
+                ans_mark = 0
+                for ans in question.many_answer.data:
+                    result_answer = ResultAnswer()
+                    result_answer.answer = list(filter(lambda x: x.id == int(ans), current_question.answers))[0]
+                    if result_answer.answer.right:
+                        ans_mark += 1 / len(list(filter(lambda x: x.right, current_question.answers)))
+                    else:
+                        ans_mark += 1 / len(list(filter(lambda x: x.right, current_question.answers)))
+                    result_question.answers.append(result_answer)
+                if ans_mark < 0:
+                    ans_mark = 0
+                mark += ans_mark
+                result.questions.append(result_question)
+            result.mark = mark
+            db_sess.merge(result)
+            db_sess.commit()
             return render_template('thank.html')
     return render_template("test.html",
                            title=poll.title,
                            poll=poll,
                            form=form,
                            questions=questions)
+
+
+# Экспорт ответов
+@app.route('/poll_export/<int:id>', methods=['GET'])
+@login_required
+def poll_export(id):
+    db_sess = db_session.create_session()
+    poll = db_sess.query(Poll).filter(Poll.id == id).first()
+    if poll:
+        with open(f'static/result_{poll.title}.csv', 'w', newline='', encoding="utf8") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=['Дата', 'Балл'],
+                delimiter=';', quoting=csv.QUOTE_NONNUMERIC)
+            writer.writeheader()
+            for result in poll.results:
+                writer.writerow({'Дата':result.date, 'Балл':result.mark})
+        return send_from_directory('static', f'result_{poll.title}.csv')
+    else:
+        abort(404)
+
+
 
 
 # Страница с вопросами выбранного опроса

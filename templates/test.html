@@ -1,20 +1,33 @@
-{% extends "base.html" %}
-{% block content %}
-    {% if poll %}
-        <h1 class="text-primary">{{poll.title}}</h1>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>{{title}}</title>
+</head>
+<body>
+<main role="main" class="container">
+        {% if poll %}
+    <br>
+        <h1 class="text-primary" align="center">{{poll.title}}</h1>
             <form action="/test/{{poll.id}}" method="post">
                  {{ form.id(hidden=True) }}
                 {{ form.hidden_tag() }}
                 {% for item in questions%}
-                    <div class="card border-primary bg-light mb-3" style="width: 69rem;">
+                   {{ item.num(hidden=True) }}
+                    <div class="card border-primary bg-light mb-3">
                     <div class="card-body">
                         <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>
 <!--                        TODO убрать маркеры в списке-->
                         <ul class="list-unstyled">
                             {% if item.many_answer %}
-                        {{ item.many_answer }}
+                                {{ item.many_answer }}
                             {% elif item.one_answer %}
-                            {{ item.one_answer }}
+                                {{ item.one_answer }}
                             {% endif %}
                         </ul>
                     {% for error in item.errors %}
@@ -25,46 +38,11 @@
                     </div>
                     </div>
                 {% endfor %}
-<!--                {% for item in form.no_questions%}-->
-<!--                    <div class="card border-primary bg-light mb-3" style="width: 69rem;">-->
-<!--                    <div class="card-body">-->
-<!--                        <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>-->
-<!--                    </div>-->
-<!--                    </div>-->
-<!--                {% endfor %}-->
-<!--                {% for item in form.one_questions%}-->
-<!--                    <div class="card border-primary bg-light mb-3" style="width: 69rem;">-->
-<!--                    <div class="card-body">-->
-<!--                        <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>-->
-<!--&lt;!&ndash;                        TODO убрать маркеры в списке&ndash;&gt;-->
-<!--                        <ul class="list-unstyled">-->
-<!--                        {{ item.one_answer }}-->
-<!--                        </ul>-->
-<!--                    {% for error in item.errors %}-->
-<!--                        <p class="alert alert-danger" role="alert">-->
-<!--                            {{ error }}-->
-<!--                        </p>-->
-<!--                    {% endfor %}-->
-<!--                    </div>-->
-<!--                    </div>-->
-<!--                {% endfor %}-->
-<!--                {% for item in form.many_questions%}-->
-<!--                    <div class="card border-primary bg-light mb-3" style="width: 69rem;">-->
-<!--                    <div class="card-body">-->
-<!--                        <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>-->
-<!--&lt;!&ndash;                        TODO убрать маркеры в списке&ndash;&gt;-->
-<!--                        <ul class="list-unstyled">-->
-<!--                        {{ item.many_answer }}-->
-<!--                        </ul>-->
-<!--                    {% for error in item.errors %}-->
-<!--                        <p class="alert alert-danger" role="alert">-->
-<!--                            {{ error }}-->
-<!--                        </p>-->
-<!--                    {% endfor %}-->
-<!--                    </div>-->
-<!--                    </div>-->
-<!--                {% endfor %}-->
-                <p> {{form.submit}} </p>
+                <div class="d-grid gap-2 col-4 mx-auto">
+                    <p> {{form.submit(type="submit", class="btn btn-primary") }} </p>
+                </div>
             </form>
     {% endif %}
-{% endblock %}
+</main>
+</body>
+</html>
