@@ -8,6 +8,30 @@
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
     <title>{{title}}</title>
+    <style>
+   li {
+    list-style-type: none; /* Убираем маркеры */
+       }
+    ul {
+        float: left;
+    padding-left: 0px; /* Сдвигаем список влево */
+   }
+    fieldset.radios {
+          border: none;
+      }
+      fieldset fields {
+          clear: both;
+      }
+      input {
+          float: left;
+          display: block;
+      }
+      label {
+          position: relative;
+          margin-left: 30px;
+          display: block;
+      }
+   </style>
 </head>
 <body>
 <main role="main" class="container">
@@ -34,18 +58,20 @@
                     <div class="card-body">
                         <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>
 <!--                        TODO убрать маркеры в списке-->
-                        <ul class="list-unstyled">
+                       <ul class="list-unstyled">
                             {% if item.many_answer %}
                                 {{ item.many_answer }}
                             {% elif item.one_answer %}
                                 {{ item.one_answer }}
                             {% endif %}
+
                         </ul>
                     </div>
                     </div>
                 {% endfor %}
                 <div class="d-grid gap-2 col-4 mx-auto">
                     <p> {{form.submit(type="submit", class="btn btn-primary") }} </p>
+                    <br><br>
                 </div>
             </form>
     {% endif %}
