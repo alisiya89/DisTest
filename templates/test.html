@@ -17,9 +17,20 @@
             <form action="/test/{{poll.id}}" method="post">
                  {{ form.id(hidden=True) }}
                 {{ form.hidden_tag() }}
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p class="alert alert-danger" role="alert"> {{ message }} </p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
                 {% for item in questions%}
                    {{ item.num(hidden=True) }}
-                    <div class="card border-primary bg-light mb-3">
+                    {% if item.errors %}
+                        <div class="card border-danger bg-light mb-3">
+                    {% else %}
+                        <div class="card border-primary bg-light mb-3">
+                    {% endif %}
                     <div class="card-body">
                         <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>
 <!--                        TODO убрать маркеры в списке-->
@@ -30,11 +41,6 @@
                                 {{ item.one_answer }}
                             {% endif %}
                         </ul>
-                    {% for error in item.errors %}
-                        <p class="alert alert-danger" role="alert">
-                            {{ error }}
-                        </p>
-                    {% endfor %}
                     </div>
                     </div>
                 {% endfor %}

@@ -3,7 +3,7 @@ import os
 import datetime
 
 import flask_login
-from flask import Flask, render_template, redirect, abort, request, send_from_directory, current_app
+from flask import Flask, render_template, redirect, abort, request, send_from_directory, current_app, flash
 from flask_login import login_user, logout_user, login_required
 from flask_login import LoginManager
 from wtforms import FieldList, FormField
@@ -99,7 +99,7 @@ def test_page(id):
             form.many_questions[i].many_answer.choices = [(answer.id, answer.text) for answer in many_answer_questions[i].answers]
         questions = list(form.no_questions) + list(form.one_questions) + list(form.many_questions)
         questions = sorted(questions, key=lambda x: int(x.num.data))
-        if form.is_submitted():
+        if form.validate_on_submit():
             mark = 0
             result = Result()
             result.date = datetime.date.today()
@@ -135,6 +135,9 @@ def test_page(id):
             db_sess.merge(result)
             db_sess.commit()
             return render_template('thank.html')
+        else:
+            if form.errors:
+                flash('Выберите минимум один ответ в каждом вопросе', 'danger')
     return render_template("test.html",
                            title=poll.title,
                            poll=poll,

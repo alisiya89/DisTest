@@ -1,14 +1,20 @@
 from flask_wtf import FlaskForm
-from wtforms import Field, StringField, SubmitField, FormField, FieldList, SelectMultipleField, RadioField, Label, Form
+from wtforms import StringField, SubmitField, FormField, FieldList, SelectMultipleField, RadioField, Label, Form
 from wtforms.validators import DataRequired, ValidationError
 from wtforms.widgets import ListWidget, CheckboxInput
 
-class RightManyAnswer:
+class RightManyAnswer():
     def __init__(self):
         self.message = 'Выберите хотя бы один вариант'
     def __call__(self, form, field):
-        if True:
-            raise ValidationError(self.message)
+        if not field.data:
+            raise ValidationError()
+
+
+class NoValidationSelectMultipleField(SelectMultipleField):
+    def pre_validate(self, form):
+        pass
+        """per_validation is disabled"""
 
 
 # Форма ответа на вопрос
@@ -19,14 +25,15 @@ class AskForm(Form):
 
 
 class OneAskForm(AskForm):
-    one_answer = RadioField(coerce=int)
+    one_answer = RadioField(coerce=int, validators=[RightManyAnswer()])
 
 
 class ManyAskForm(AskForm):
     # # TODO валидация поля с множественным выбором
-    many_answer = SelectMultipleField(
+    many_answer = SelectMultipleField(validate_choice=False,
+        validators=[RightManyAnswer()],
         widget=ListWidget(html_tag='ul', prefix_label=False),
-        option_widget=CheckboxInput(), )
+        option_widget=CheckboxInput())
 
 
 # Форма прохождения опроса
