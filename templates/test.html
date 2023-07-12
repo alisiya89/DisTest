@@ -56,7 +56,7 @@
                         <div class="card border-primary bg-light mb-3">
                     {% endif %}
                     <div class="card-body">
-                        <h5 class="card-title fw-bold text-secondary">{{item.question}}</h5>
+                        <h5 class="card-title fw-bold text-secondary">{{item.num.data}}. {{item.question}}</h5>
 <!--                        TODO убрать маркеры в списке-->
                        <ul class="list-unstyled">
                             {% if item.many_answer %}

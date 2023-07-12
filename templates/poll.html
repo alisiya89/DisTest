@@ -5,7 +5,7 @@
         {% for item in questions%}
             <div class="card border-primary bg-light mb-3">
               <div class="card-body">
-                <h5 class="card-title fw-bold text-secondary">{{item.text}}</h5>
+                <h5 class="card-title fw-bold text-secondary">{{ item.number }}. {{item.text}}</h5>
                   <table class="table">
                   {% for answer in item.answers %}
                       <tr>
