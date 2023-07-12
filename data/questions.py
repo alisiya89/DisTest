@@ -13,6 +13,7 @@ class Question(SqlAlchemyBase):
     type_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("types.id"))
     number = sqlalchemy.Column(sqlalchemy.Integer)
+    mix = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False)
     type = orm.relation('Type')
     poll_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("polls.id"))

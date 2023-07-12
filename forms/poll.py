@@ -14,6 +14,7 @@ class QuestionForm(FlaskForm):
 
     id = StringField()
     text = TextAreaField('Вопрос', validators=[DataRequired()])
+    mix = BooleanField(label='Перемешивать ответы', default=True)
     type = RadioField('Типы вопросов', validators=[DataRequired()])
     submit = SubmitField('Добавить вопрос')
 

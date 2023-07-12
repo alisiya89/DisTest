@@ -1,6 +1,7 @@
 import csv
 import os
 import datetime
+from random import shuffle
 
 import flask_login
 from flask import Flask, render_template, redirect, abort, request, send_from_directory, current_app, flash
@@ -91,12 +92,18 @@ def test_page(id):
             form.one_questions[i].num.data = one_answer_questions[i].number
             form.one_questions[i].id = one_answer_questions[i].id
             form.one_questions[i].question = one_answer_questions[i].text
-            form.one_questions[i].one_answer.choices = [(answer.id, answer.text) for answer in one_answer_questions[i].answers]
+            o_quest = [(answer.id, answer.text) for answer in one_answer_questions[i].answers]
+            if one_answer_questions[i].mix:
+                shuffle(o_quest)
+            form.one_questions[i].one_answer.choices = o_quest
         for i in range(len(many_answer_questions)):
             form.many_questions[i].num.data = many_answer_questions[i].number
             form.many_questions[i].id = many_answer_questions[i].id
             form.many_questions[i].question = many_answer_questions[i].text
-            form.many_questions[i].many_answer.choices = [(answer.id, answer.text) for answer in many_answer_questions[i].answers]
+            m_quest = [(answer.id, answer.text) for answer in many_answer_questions[i].answers]
+            if many_answer_questions[i].mix:
+                shuffle(m_quest)
+            form.many_questions[i].many_answer.choices = m_quest
         questions = list(form.no_questions) + list(form.one_questions) + list(form.many_questions)
         questions = sorted(questions, key=lambda x: int(x.num.data))
         if form.validate_on_submit():
@@ -192,6 +199,7 @@ def question_page(id):
                                            message=['q', item.id, message])
             question = Question()
             question.text = question_text
+            question.mix = form.mix.data
             question.type = db_sess.query(Type).filter(Type.name == form.type.data).first()
             if poll.questions:
                 question.number = max(poll.questions, key=lambda x: x.number).number + 1
@@ -200,6 +208,7 @@ def question_page(id):
             poll.questions.append(question)
             db_sess.merge(poll)
             db_sess.commit()
+            #TODO скролл на последний добавленный вопрос
             return redirect(f'/poll/{id}')
         elif answer_form.validate_on_submit() and answer_form.id.data == 'answer':
             answer_text = answer_form.text.data
