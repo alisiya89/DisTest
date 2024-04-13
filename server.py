@@ -111,10 +111,13 @@ def test_page(id):
             result = Result()
             result.date = datetime.date.today()
             result.poll_id = form.id.data
+            len_questions = 0
             for question in form.one_questions:
                 result_question = ResultQuestion()
                 current_question = db_sess.query(Question).filter(Question.id == question.id).first()
                 result_question.question = current_question
+                if any([a.right for a in current_question.answers]):
+                    len_questions += 1
                 result_answer = ResultAnswer()
                 result_answer.answer = list(filter(lambda x: x.id == question.one_answer.data, current_question.answers))[0]
                 if result_answer.answer.right:
@@ -125,6 +128,8 @@ def test_page(id):
                 result_question = ResultQuestion()
                 current_question = db_sess.query(Question).filter(Question.id == question.id).first()
                 result_question.question = current_question
+                if any([a.right for a in current_question.answers]):
+                    len_questions += 1
                 ans_mark = 0
                 for ans in question.many_answer.data:
                     result_answer = ResultAnswer()
@@ -138,7 +143,7 @@ def test_page(id):
                     ans_mark = 0
                 mark += ans_mark
                 result.questions.append(result_question)
-            result.mark = mark
+            result.mark = round(mark / len_questions * 100, 2)
             db_sess.merge(result)
             db_sess.commit()
             return render_template('thank.html')
