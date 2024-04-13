@@ -132,7 +132,7 @@ def test_page(id):
                     if result_answer.answer.right:
                         ans_mark += 1 / len(list(filter(lambda x: x.right, current_question.answers)))
                     else:
-                        ans_mark += 1 / len(list(filter(lambda x: x.right, current_question.answers)))
+                        ans_mark -= 1 / len(list(filter(lambda x: x.right, current_question.answers)))
                     result_question.answers.append(result_answer)
                 if ans_mark < 0:
                     ans_mark = 0
